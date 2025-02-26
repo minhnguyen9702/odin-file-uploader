@@ -2,6 +2,7 @@ const path = require("node:path");
 const express = require("express");
 const session = require("express-session");
 const expressLayouts = require("express-ejs-layouts");
+const connectFlash = require("connect-flash");
 const passport = require("./auth");
 const { PrismaClient } = require("@prisma/client");
 const PrismaSessionStore =
@@ -18,6 +19,7 @@ app.set("layout", "layout");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(
   session({
     secret: "your-secret-key",
@@ -32,6 +34,7 @@ app.use(
     cookie: { secure: false },
   })
 );
+app.use(connectFlash());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -40,7 +43,7 @@ const ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.redirect("/login");
+  res.redirect("/user/login");
 };
 app.use((req, res, next) => {
   if (req.user) {
@@ -60,7 +63,7 @@ const userRouter = require("./routes/userRouter");
 
 //setting up routes
 app.get("/", ensureAuthenticated, (req, res) => {
-  res.render("index", { user: req.user });
+  res.render("index");
 });
 app.use("/user", userRouter);
 

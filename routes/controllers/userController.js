@@ -1,17 +1,33 @@
 const passport = require("../../auth");
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
 exports.addNewUser = async (req, res) => {
-  const { email, password, confirmPassword } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const { username, password, confirmPassword } = req.body;
+  if (password !== confirmPassword) {
+    req.flash("error", "Passwords do not match.");
+    return res.redirect("/user/sign-up");
+  }
   try {
-    const user = await prisma.user.create({
-      data: { email, password: hashedPassword },
+    const existingUser = await prisma.users.findUnique({
+      where: { username },
     });
-    res.status(201).json(user);
+    if (existingUser) {
+      req.flash("error", "Username already taken. Please use a different one");
+      return res.redirect("/user/sign-up");
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await prisma.users.create({
+      data: { username, password: hashedPassword },
+    });
+    res.redirect("/user/login");
   } catch (err) {
-    res.status(400).json({ error: "User already exists" });
+    req.flash(
+      "error",
+      err.message || "An error occurred while creating the user."
+    );
+    res.redirect("/user/sign-up");
   }
 };
 

@@ -1,0 +1,59 @@
+<div class="d-flex justify-content-center">
+  <form
+    action="/user/sign-up"
+    method="POST"
+    class="container mt-4"
+    style="max-width: 500px"
+  >
+    <h2 class="text-center">Minh Drive: Sign Up</h2>
+
+    <div class="mb-3">
+      <label for="username" class="form-label d-block text-start"
+        >Username</label
+      >
+      <input
+        type="text"
+        name="username"
+        id="username"
+        class="form-control"
+        required
+      />
+    </div>
+
+    <div class="mb-3">
+      <label for="password" class="form-label d-block text-start"
+        >Password</label
+      >
+      <input
+        type="password"
+        name="password"
+        id="password"
+        class="form-control"
+        required
+      />
+    </div>
+
+    <div class="mb-3">
+      <label for="confirmPassword" class="form-label d-block text-start"
+        >Confirm Password</label
+      >
+      <input
+        type="password"
+        name="confirmPassword"
+        id="confirmPassword"
+        class="form-control"
+        required
+      />
+    </div>
+
+    <a href="/user/sign-up">Already have an account? Login here</a>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary mt-3">Sign Up</button>
+    </div>
+
+    <% if (errorMessage && errorMessage.length > 0) { %>
+    <div class="alert alert-danger text-center mt-4"><%= errorMessage %></div>
+    <% } %>
+  </form>
+</div>
