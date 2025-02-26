@@ -1,2 +1,46 @@
-<p>Please login mate</p>
-<a href="/user/sign-up">Don't have an account? Sign up here</a>
+<div class="d-flex justify-content-center">
+    <form
+      action="/user/login"
+      method="POST"
+      class="container mt-4"
+      style="max-width: 500px"
+    >
+      <h1 class="text-center">uploder</h1>
+  
+      <div class="mb-3">
+        <label for="username" class="form-label d-block text-start"
+          >Username</label
+        >
+        <input
+          type="text"
+          name="username"
+          id="username"
+          class="form-control"
+          required
+        />
+      </div>
+  
+      <div class="mb-3">
+        <label for="password" class="form-label d-block text-start"
+          >Password</label
+        >
+        <input
+          type="password"
+          name="password"
+          id="password"
+          class="form-control"
+          required
+        />
+      </div>
+  
+      <a href="/user/sign-up">Don't have an account? Sign up here</a>
+  
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary mt-3">Log In</button>
+      </div>
+  
+      <% if (errorMessage && errorMessage.length > 0) { %>
+      <div class="alert alert-danger text-center mt-4"><%= errorMessage %></div>
+      <% } %>
+    </form>
+  </div>

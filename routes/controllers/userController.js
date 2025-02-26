@@ -32,6 +32,7 @@ exports.addNewUser = async (req, res) => {
 };
 
 exports.handleLogin = (req, res, next) => {
+  console.log("sign in!");
   passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/",
