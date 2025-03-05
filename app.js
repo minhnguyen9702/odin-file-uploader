@@ -50,17 +50,20 @@ app.use((req, res, next) => {
     res.locals.user = null;
   }
   res.locals.errorMessage = req.flash("error");
+  res.locals.successMessage = req.flash("success");
   next();
 });
 
 //importing routers
 const userRouter = require("./routes/userRouter");
+const fileRouter = require("./routes/fileRouter");
 
 //setting up routes
 app.get("/", ensureAuthenticated, (req, res) => {
   res.render("index");
 });
 app.use("/user", userRouter);
+app.use("/file", fileRouter);
 
 
 app.listen(3000, () => console.log("Server running on http://localhost:3000"));

@@ -1,0 +1,12 @@
+<form action="/file/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" required>
+    <button type="submit">Upload</button>
+</form>
+
+<% if (successMessage && successMessage.length > 0) { %>
+    <div class="alert alert-success text-center mt-4"><%= successMessage %></div>
+<% } %>
+
+<% if (errorMessage && errorMessage.length > 0) { %>
+    <div class="alert alert-danger text-center mt-4"><%= errorMessage %></div>
+<% } %>
