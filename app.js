@@ -3,7 +3,8 @@ const express = require("express");
 const session = require("express-session");
 const expressLayouts = require("express-ejs-layouts");
 const connectFlash = require("connect-flash");
-const passport = require("./auth");
+const passport = require('./auth');
+const { ensureAuthenticated } = require('./auth');
 const { PrismaClient } = require("@prisma/client");
 const PrismaSessionStore =
   require("@quixo3/prisma-session-store").PrismaSessionStore;
@@ -38,13 +39,7 @@ app.use(connectFlash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// authentication middleware + making sure user is global
-const ensureAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect("/user/login");
-};
+// making sure user is global and can be accessed from any route
 app.use((req, res, next) => {
   if (req.user) {
     res.locals.user = {

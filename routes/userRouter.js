@@ -17,6 +17,6 @@ userRouter.get("/login", redirectIfAuthenticated, (req, res) => {
   res.render("login");
 });
 userRouter.post("/login", redirectIfAuthenticated, userController.handleLogin);
-userRouter.get("/logout", userController.handleLogout);
+userRouter.post("/logout", userController.handleLogout);
 
 module.exports = userRouter;
