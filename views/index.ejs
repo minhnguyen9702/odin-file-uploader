@@ -8,11 +8,11 @@
       <button type="submit" class="btn btn-danger">Logout</button>
     </form>
     <form action="/folder/create" method="POST" class="input-group w-auto">
-      <input 
-        type="text" 
-        name="folderName" 
-        class="form-control" 
-        placeholder="Folder Name" 
+      <input
+        type="text"
+        name="folderName"
+        class="form-control"
+        placeholder="Folder Name"
         required
       />
       <button type="submit" class="btn btn-success">Create Folder</button>
@@ -27,10 +27,28 @@
     <li
       class="list-group-item d-flex justify-content-between align-items-center"
     >
-      <%= folder.name %>
-      <a href="/folder/delete/<%= folder.id %>" class="btn btn-danger btn-sm"
-        >Delete</a
-      >
+      <div>
+        <!-- Folder icon -->
+        <i class="bi bi-folder-fill text-warning me-2"></i>
+        <strong><%= folder.name %></strong>
+        <small class="text-muted">
+          • Created on <%= new Date(folder.createdAt).toLocaleDateString()
+          %></small
+        >
+      </div>
+      <div>
+        <a href="/folder/<%= folder.id %>" class="btn btn-primary btn-sm me-2"
+          >Open</a
+        >
+        <form
+          action="/folder/delete/<%= folder.id %>"
+          method="POST"
+          class="d-inline"
+        >
+          <input type="hidden" name="_method" value="DELETE" />
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+      </div>
     </li>
     <% }) %>
   </ul>

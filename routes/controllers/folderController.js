@@ -5,14 +5,12 @@ exports.createNewFolder = async (req, res) => {
   try {
     const folder = await prisma.folder.create({
       data: {
-        name: req.body.folderName, // ✅ Make sure this matches the form input name
+        name: req.body.folderName,
         userId: req.user.id,
       },
     });
 
-    console.log("Folder created:", folder); // ✅ Debugging step to confirm folder creation
-
-    res.redirect("/"); // ✅ Redirect back to the previous page after success
+    res.redirect("/");
   } catch (error) {
     console.error("Error creating folder:", error);
     res.status(500).json({ error: "Failed to create folder" });
@@ -34,10 +32,14 @@ exports.getUserFolders = async (req) => {
 
 exports.deleteFolder = async (req, res) => {
   try {
+    await prisma.file.deleteMany({
+      where: { folderId: req.params.id, userId: req.user.id },
+    });
     await prisma.folder.delete({
       where: { id: req.params.id, userId: req.user.id },
     });
-    res.json({ message: "Folder deleted" });
+    res.redirect("/");
+    return;
   } catch (error) {
     res.status(500).json({ error: "Failed to delete folder" });
   }
