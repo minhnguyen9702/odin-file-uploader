@@ -1,12 +1,37 @@
-<form action="file/upload" method="GET" style="display: inline">
-  <button type="submit" class="btn btn-primary">Upload a File</button>
-</form>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid justify-content-center">
+    <form action="/file/upload" method="GET" class="me-2">
+      <button type="submit" class="btn btn-primary">Upload a File</button>
+    </form>
+    <form action="/user/logout" method="POST" class="me-2">
+      <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+    <form action="/folder/create" method="POST" class="input-group w-auto">
+      <input 
+        type="text" 
+        name="folderName" 
+        class="form-control" 
+        placeholder="Folder Name" 
+        required
+      />
+      <button type="submit" class="btn btn-success">Create Folder</button>
+    </form>
+  </div>
+</nav>
 
-<form action="user/logout" method="POST" style="display: inline">
-  <button type="submit" class="btn btn-danger">Logout</button>
-</form>
-
-<form action="/folder/create" method="POST" style="display: inline">
-  <input type="text" name="folderName" class="form-control d-inline w-auto" placeholder="Folder Name" required>
-  <button type="submit" class="btn btn-success">Create Folder</button>
-</form>
+<!-- Folder List -->
+<div class="container mt-4">
+  <ul class="list-group">
+    <% folders.forEach(folder => { %>
+    <li
+      class="list-group-item d-flex justify-content-between align-items-center"
+    >
+      <%= folder.name %>
+      <a href="/folder/delete/<%= folder.id %>" class="btn btn-danger btn-sm"
+        >Delete</a
+      >
+    </li>
+    <% }) %>
+  </ul>
+</div>

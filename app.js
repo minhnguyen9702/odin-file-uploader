@@ -3,8 +3,8 @@ const express = require("express");
 const session = require("express-session");
 const expressLayouts = require("express-ejs-layouts");
 const connectFlash = require("connect-flash");
-const passport = require('./auth');
-const { ensureAuthenticated } = require('./auth');
+const passport = require("./auth");
+const { ensureAuthenticated } = require("./auth");
 const { PrismaClient } = require("@prisma/client");
 const PrismaSessionStore =
   require("@quixo3/prisma-session-store").PrismaSessionStore;
@@ -58,14 +58,20 @@ app.use((req, res, next) => {
 const userRouter = require("./routes/userRouter");
 const fileRouter = require("./routes/fileRouter");
 const folderRouter = require("./routes/folderRouter");
+const { getUserFolders } = require("./routes/controllers/folderController");
 
 //setting up routes
-app.get("/", ensureAuthenticated, (req, res) => {
-  res.render("index");
+app.get("/", ensureAuthenticated, async (req, res) => {
+  try {
+    const folders = await getUserFolders(req);
+    res.render("index", { folders });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error loading index page");
+  }
 });
 app.use("/user", userRouter);
 app.use("/file", fileRouter);
 app.use("/folder", folderRouter);
-
 
 app.listen(3000, () => console.log("Server running on http://localhost:3000"));
