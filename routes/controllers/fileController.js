@@ -5,8 +5,6 @@ const prisma = new PrismaClient();
 exports.uploadFile = [
   upload.single("file"),
   async (req, res) => {
-    console.log("Request Body:", req.body);
-    console.log("Uploaded File:", req.file);
 
     if (!req.file) {
       req.flash("error", "No file uploaded.");

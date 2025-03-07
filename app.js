@@ -59,12 +59,15 @@ const userRouter = require("./routes/userRouter");
 const fileRouter = require("./routes/fileRouter");
 const folderRouter = require("./routes/folderRouter");
 const { getUserFolders } = require("./routes/controllers/folderController");
+const { getRootFiles } = require("./routes/controllers/fileController");
+
 
 //setting up routes
 app.get("/", ensureAuthenticated, async (req, res) => {
   try {
     const folders = await getUserFolders(req);
-    res.render("index", { folders });
+    const files = await getRootFiles(req);
+    res.render("index", { folders, files });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error loading index page");
