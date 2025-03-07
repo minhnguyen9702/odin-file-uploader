@@ -5,29 +5,47 @@ const prisma = new PrismaClient();
 exports.uploadFile = [
   upload.single("file"),
   async (req, res) => {
+    console.log("Request Body:", req.body);
+    console.log("Uploaded File:", req.file);
+
     if (!req.file) {
       req.flash("error", "No file uploaded.");
       return res.redirect("/file/upload");
     }
 
-    const { folderId } = req.body; // Read folderId from form data
+    let { folderId } = req.body;
+    folderId = folderId === "" ? null : folderId;
 
     try {
       await prisma.file.create({
         data: {
-          filename: req.file.originalname, // Store original filename
+          filename: req.file.originalname, // Original file name
+          uniqueFileName: req.file.filename, // Unique file name (timestamp + original name)
           userId: req.user.id,
-          folderId: folderId || null, // Associate file with a folder if provided
+          folderId,
         },
       });
 
       req.flash("success", "File uploaded successfully.");
       res.redirect("/file/upload");
     } catch (err) {
-      console.error(err);
+      console.error("Upload Error:", err);
       req.flash("error", "Error saving file data.");
       res.redirect("/file/upload");
     }
   },
 ];
 
+
+
+exports.getRootFiles = async (req, res) => {
+  try {
+    const files = await prisma.file.findMany({
+      where: { userId: req.user.id, folderId: null },
+    });
+    return(files)
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch root files" });
+  }
+};
