@@ -10,11 +10,14 @@ exports.uploadFile = [
       return res.redirect("/file/upload");
     }
 
+    const { folderId } = req.body; // Read folderId from form data
+
     try {
       await prisma.file.create({
         data: {
-          filename: req.file.originalname,
+          filename: req.file.originalname, // Store original filename
           userId: req.user.id,
+          folderId: folderId || null, // Associate file with a folder if provided
         },
       });
 
@@ -27,3 +30,4 @@ exports.uploadFile = [
     }
   },
 ];
+

@@ -57,6 +57,7 @@ app.use((req, res, next) => {
 //importing routers
 const userRouter = require("./routes/userRouter");
 const fileRouter = require("./routes/fileRouter");
+const folderRouter = require("./routes/folderRouter");
 
 //setting up routes
 app.get("/", ensureAuthenticated, (req, res) => {
@@ -64,6 +65,7 @@ app.get("/", ensureAuthenticated, (req, res) => {
 });
 app.use("/user", userRouter);
 app.use("/file", fileRouter);
+app.use("/folder", folderRouter);
 
 
 app.listen(3000, () => console.log("Server running on http://localhost:3000"));

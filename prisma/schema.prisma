@@ -14,10 +14,11 @@ datasource db {
 }
 
 model Users {
-  id       String @id @default(uuid())
-  username String @unique
+  id       String  @id @default(uuid())
+  username String  @unique
   password String
   files    File[]
+  folders  Folder[]
 }
 
 model Session {
@@ -27,10 +28,21 @@ model Session {
   expiresAt DateTime
 }
 
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  files     File[]
+  createdAt DateTime @default(now())
+}
+
 model File {
   id         String   @id @default(uuid())
   filename   String
   uploadedAt DateTime @default(now())
   user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
+  folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folderId   String?
 }
