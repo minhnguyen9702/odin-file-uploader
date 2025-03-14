@@ -13,7 +13,7 @@ fileRouter.get("/upload", ensureAuthenticated, async (req, res) => {
     res.status(500).send("Error loading upload page.");
   }
 });
-
 fileRouter.post("/upload", ensureAuthenticated, fileController.uploadFile);
+fileRouter.post("/delete/:id", ensureAuthenticated, fileController.deleteFile);
 
 module.exports = fileRouter;
