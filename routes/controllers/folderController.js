@@ -73,3 +73,11 @@ exports.deleteFolder = async (req, res) => {
     res.status(500).json({ error: "Failed to delete folder" });
   }
 };
+
+exports.getFilesInFolder = async(folderId) => {
+  const files = await prisma.file.findMany({
+    where: { folderId },
+  });
+
+  return files;
+}

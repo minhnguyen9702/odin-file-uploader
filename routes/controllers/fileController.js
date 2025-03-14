@@ -34,8 +34,6 @@ exports.uploadFile = [
   },
 ];
 
-
-
 exports.getRootFiles = async (req, res) => {
   try {
     const files = await prisma.file.findMany({
