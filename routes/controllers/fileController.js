@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 exports.uploadFile = [
   upload.single("file"),
   async (req, res) => {
-
     if (!req.file) {
       req.flash("error", "No file uploaded.");
       return res.redirect("/file/upload");
@@ -41,7 +40,7 @@ exports.getRootFiles = async (req, res) => {
     const files = await prisma.file.findMany({
       where: { userId: req.user.id, folderId: null },
     });
-    return(files)
+    return files;
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch root files" });
@@ -64,7 +63,13 @@ exports.deleteFile = async (req, res) => {
     }
 
     // Construct file path
-    const filePath = path.join(__dirname, "..", "..", "uploads", file.uniqueFileName);
+    const filePath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "uploads",
+      file.uniqueFileName
+    );
     console.log("Attempting to delete:", filePath);
 
     // Delete file from disk asynchronously
@@ -89,5 +94,32 @@ exports.deleteFile = async (req, res) => {
   } catch (error) {
     console.error("Delete Error:", error);
     res.status(500).json({ error: "Failed to delete file" });
+  }
+};
+
+exports.downloadFile = async (req, res) => {
+  try {
+    const { uniqueFileName } = req.params;
+
+    const file = await prisma.file.findUnique({
+      where: { uniqueFileName },
+    });
+
+    if (!file) {
+      return res.status(404).send("File not found!");
+    }
+
+    const filePath = path.join(__dirname, "../../uploads", file.uniqueFileName);
+
+    // Send the file for download
+    res.download(filePath, file.filename, (err) => {
+      if (err) {
+        console.error("Download error:", err);
+        res.status(500).send("Error downloading file");
+      }
+    });
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).send("Server error");
   }
 };
