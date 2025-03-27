@@ -1,5 +1,10 @@
+<div class="d-flex justify-content-center my-3">
+  <a href="/" class="btn btn-primary">
+    <i class="bi bi-arrow-left"></i> Back to Home
+  </a>
+</div>
 <% if (files && files.length > 0) { %>
-    <div class="container">
-      <%- include('partials/_filesList', { files: files }) %>
-    </div>
-  <% } %>
+<div class="container">
+  <%- include('partials/_filesList', { files: files }) %>
+</div>
+<% } %>
