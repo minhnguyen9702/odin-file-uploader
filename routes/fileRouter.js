@@ -15,6 +15,6 @@ fileRouter.get("/upload", ensureAuthenticated, async (req, res) => {
 });
 fileRouter.post("/upload", ensureAuthenticated, fileController.uploadFile);
 fileRouter.post("/delete/:id", ensureAuthenticated, fileController.deleteFile);
-fileRouter.get("/download/:uniqueFileName", ensureAuthenticated, fileController.downloadFile);
+fileRouter.get("/download/:id", ensureAuthenticated, fileController.downloadFile);
 
 module.exports = fileRouter;
