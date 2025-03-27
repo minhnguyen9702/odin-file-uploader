@@ -5,6 +5,7 @@ const expressLayouts = require("express-ejs-layouts");
 const connectFlash = require("connect-flash");
 const passport = require("./auth");
 const { ensureAuthenticated } = require("./auth");
+const fileUpload = require("express-fileupload");
 const { PrismaClient } = require("@prisma/client");
 const PrismaSessionStore =
   require("@quixo3/prisma-session-store").PrismaSessionStore;
@@ -38,6 +39,7 @@ app.use(
 app.use(connectFlash());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(fileUpload({ useTempFiles: true, tempFileDir: "/tmp/" }));
 
 // making sure user is global and can be accessed from any route
 app.use((req, res, next) => {

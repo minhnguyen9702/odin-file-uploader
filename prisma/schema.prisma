@@ -38,12 +38,12 @@ model Folder {
 }
 
 model File {
-  id             String   @id @default(uuid())
-  filename       String
-  uniqueFileName String   @unique
-  uploadedAt     DateTime @default(now())
-  user           Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  folder         Folder?  @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  folderId       String?
+  id         String   @id @default(uuid())
+  filename   String
+  fileUrl    String
+  uploadedAt DateTime @default(now())
+  user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folderId   String?
 }

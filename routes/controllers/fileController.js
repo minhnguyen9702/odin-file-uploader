@@ -1,55 +1,60 @@
-const upload = require("../../multer");
-const fs = require("fs");
-const path = require("path");
+const cloudinary = require("../../cloudinary");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-exports.uploadFile = [
-  upload.single("file"),
-  async (req, res) => {
-    if (!req.file) {
+// Upload File to Cloudinary
+exports.uploadFile = async (req, res) => {
+  try {
+    if (!req.files || !req.files.file) {
       req.flash("error", "No file uploaded.");
       return res.redirect("/file/upload");
     }
 
-    let { folderId } = req.body;
-    folderId = folderId === "" ? null : folderId;
+    const file = req.files.file;
 
-    try {
-      await prisma.file.create({
-        data: {
-          filename: req.file.originalname, // Original file name
-          uniqueFileName: req.file.filename, // Unique file name (timestamp + original name)
-          userId: req.user.id,
-          folderId,
-        },
-      });
+    console.log("Uploading file to Cloudinary...");
 
-      req.flash("success", "File uploaded successfully.");
-      res.redirect("/file/upload");
-    } catch (err) {
-      console.error("Upload Error:", err);
-      req.flash("error", "Error saving file data.");
-      res.redirect("/file/upload");
-    }
-  },
-];
-
-exports.getRootFiles = async (req, res) => {
-  try {
-    const files = await prisma.file.findMany({
-      where: { userId: req.user.id, folderId: null },
+    // Upload directly to Cloudinary
+    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+      folder: "uploder",
     });
-    return files;
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch root files" });
+
+    console.log("Cloudinary Response:", result);
+
+    // Save file data to the database
+    await prisma.file.create({
+      data: {
+        filename: file.name,
+        fileUrl: result.secure_url,
+        userId: req.user.id,
+      },
+    });
+
+    req.flash("success", "File uploaded successfully.");
+    res.redirect("/file/upload");
+  } catch (err) {
+    console.error("Upload Error:", err);
+    req.flash("error", "Error uploading file.");
+    res.redirect("/file/upload");
   }
 };
 
+// Get Files in Root Folder
+exports.getRootFiles = async (req) => {
+  try {
+    return await prisma.file.findMany({
+      where: { userId: req.user.id, folderId: null },
+    });
+  } catch (error) {
+    console.error("Fetch Error:", error);
+    throw error; // Re-throw to handle it in the calling function
+  }
+};
+
+// Delete File
 exports.deleteFile = async (req, res) => {
   try {
-    const fileId = req.params.id; // Fix param name
+    const fileId = req.params.id;
     const userId = req.user.id;
 
     // Fetch file from database
@@ -62,29 +67,13 @@ exports.deleteFile = async (req, res) => {
       return res.status(404).json({ error: "File not found" });
     }
 
-    // Construct file path
-    const filePath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "uploads",
-      file.uniqueFileName
-    );
-    console.log("Attempting to delete:", filePath);
+    // Extract Cloudinary public ID
+    const publicId = "uploder/" + file.fileUrl.split("/").pop().split(".")[0];
 
-    // Delete file from disk asynchronously
-    try {
-      await fs.promises.unlink(filePath);
-      console.log("Deleted from disk:", filePath);
-    } catch (err) {
-      if (err.code === "ENOENT") {
-        console.log("File not found on disk:", filePath);
-      } else {
-        throw err; // Handle unexpected errors
-      }
-    }
+    // Delete from Cloudinary
+    await cloudinary.uploader.destroy(publicId);
 
-    // Delete file reference from database
+    // Delete file from database
     await prisma.file.delete({
       where: { id: fileId },
     });
@@ -97,27 +86,21 @@ exports.deleteFile = async (req, res) => {
   }
 };
 
+// Download File (Redirect to Cloudinary URL)
 exports.downloadFile = async (req, res) => {
   try {
-    const { uniqueFileName } = req.params;
+    const { id } = req.params;
 
     const file = await prisma.file.findUnique({
-      where: { uniqueFileName },
+      where: { id },
     });
 
     if (!file) {
       return res.status(404).send("File not found!");
     }
 
-    const filePath = path.join(__dirname, "../../uploads", file.uniqueFileName);
-
-    // Send the file for download
-    res.download(filePath, file.filename, (err) => {
-      if (err) {
-        console.error("Download error:", err);
-        res.status(500).send("Error downloading file");
-      }
-    });
+    // Redirect to Cloudinary URL
+    res.redirect(file.fileUrl);
   } catch (error) {
     console.error("Server error:", error);
     res.status(500).send("Server error");
