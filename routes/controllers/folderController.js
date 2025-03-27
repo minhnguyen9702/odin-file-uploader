@@ -1,5 +1,4 @@
-const fs = require("fs");
-const path = require("path");
+const cloudinary = require("../../cloudinary");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -34,38 +33,44 @@ exports.getUserFolders = async (req) => {
 
 exports.deleteFolder = async (req, res) => {
   try {
-    // Fetch files to delete
+    const folderId = req.params.id;
+    const userId = req.user.id;
+
+    // Fetch all files in the folder
     const files = await prisma.file.findMany({
-      where: { folderId: req.params.id, userId: req.user.id },
+      where: { folderId, userId },
     });
+
     if (files.length === 0) {
       console.log("No files found in the folder.");
     }
-    // Delete files from disk
+
+    // Delete files from Cloudinary
     for (const file of files) {
-      const filePath = path.join(
-        __dirname,
-        "..",
-        "..",
-        "uploads",
-        file.uniqueFileName
-      );
-      console.log("Attempting to delete:", filePath);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log("Deleted:", filePath);
-      } else {
-        console.log("File not found:", filePath);
-      }
+      // Extract Cloudinary public ID
+      const urlParts = file.fileUrl.split("/");
+      const fileNameWithExt = urlParts.pop(); // Get last part of the URL (e.g., 'image.png')
+      const fileName = fileNameWithExt.split(".")[0]; // Remove file extension
+
+      // Extract folder path (Cloudinary stores full path)
+      const folderPath = urlParts.slice(7).join("/"); // Preserve Cloudinary folder structure
+
+      const publicId = `${folderPath}/${fileName}`;
+
+      console.log("Deleting from Cloudinary:", publicId);
+
+      const result = await cloudinary.uploader.destroy(publicId);
+      console.log("Cloudinary Response:", result);
     }
-    // Delete references from database
+
     await prisma.file.deleteMany({
-      where: { folderId: req.params.id, userId: req.user.id },
+      where: { folderId, userId },
     });
-    // Delete folder from database
+
     await prisma.folder.delete({
-      where: { id: req.params.id, userId: req.user.id },
+      where: { id: folderId, userId },
     });
+
     console.log("Folder and its files deleted successfully.");
     res.redirect("/");
   } catch (error) {
@@ -74,10 +79,11 @@ exports.deleteFolder = async (req, res) => {
   }
 };
 
-exports.getFilesInFolder = async(folderId) => {
+
+exports.getFilesInFolder = async (folderId) => {
   const files = await prisma.file.findMany({
     where: { folderId },
   });
 
   return files;
-}
+};

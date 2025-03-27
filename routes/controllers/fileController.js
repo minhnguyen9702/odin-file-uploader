@@ -75,7 +75,6 @@ exports.deleteFile = async (req, res) => {
   try {
     const fileId = req.params.id;
     const userId = req.user.id;
-    const username = req.user.username; 
 
     if (!userId) {
       req.flash("error", "User must be authenticated.");
@@ -91,9 +90,19 @@ exports.deleteFile = async (req, res) => {
       return res.status(404).json({ error: "File not found" });
     }
 
-    const publicId = `uploder/${userId}` + file.fileUrl.split("/").pop().split(".")[0];
+    // Extract Cloudinary public ID
+    const urlParts = file.fileUrl.split("/");
+    const fileNameWithExt = urlParts.pop(); // Get last part of the URL (e.g., 'image.png')
+    const fileName = fileNameWithExt.split(".")[0]; // Remove file extension (e.g., 'image')
 
-    await cloudinary.uploader.destroy(publicId);
+    const folderPath = urlParts.slice(7).join("/");
+
+    const publicId = `${folderPath}/${fileName}`;
+
+    console.log("Deleting from Cloudinary:", publicId);
+
+    const result = await cloudinary.uploader.destroy(publicId);
+    console.log("Cloudinary Response:", result);
 
     await prisma.file.delete({
       where: { id: fileId },
